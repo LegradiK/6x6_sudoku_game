@@ -22,8 +22,8 @@ def draw_background(screen):
 def draw_grid_lines(screen, state):
     dif = state.cell_size
 
-    for i in range(5):
-        thickness = 4 if i % 2 == 0 else 1
+    for i in range(7):
+        thickness = 4 if i % 3 == 0 else 1
 
         # Horizontal lines
         pygame.draw.line(
@@ -47,8 +47,8 @@ def draw_grid_lines(screen, state):
 def draw_numbers(screen, state):
     dif = state.cell_size
 
-    for row in range(4):
-        for col in range(4):
+    for row in range(6):
+        for col in range(6):
             value = state.grid[row][col]
 
             if value != 0:
@@ -94,7 +94,7 @@ def draw_instructions(screen, font, height):
         (0, 0, 0)
     )
     text2 = font.render(
-        "1-4: Input",
+        "1-6: Input",
         True,
         (0, 0, 0)
     )

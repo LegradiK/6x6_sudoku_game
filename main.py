@@ -1,5 +1,4 @@
 import pygame
-from csv_reader import load_random_puzzle
 from button import Button
 from ui import (
     GameState,

@@ -23,24 +23,26 @@ def draw_grid_lines(screen, state):
     dif = state.cell_size
 
     for i in range(7):
-        thickness = 4 if i % 3 == 0 else 1
+        h_thickness = 4 if i % 2 == 0 else 1
 
         # Horizontal lines
         pygame.draw.line(
             screen,
             (0, 0, 0),
             (0, i * dif),
-            (dif * 4, i * dif),
-            thickness
+            (dif * 6, i * dif),
+            h_thickness
         )
+
+        v_thickness = 4 if i % 3 == 0 else 1
 
         # Vertical lines
         pygame.draw.line(
             screen,
             (0, 0, 0),
             (i * dif, 0),
-            (i * dif, dif * 4),
-            thickness
+            (i * dif, dif * 6),
+            v_thickness
         )
 
 

@@ -1,4 +1,5 @@
 import pygame
+import requests
 from button import Button
 from ui import (
     GameState,
@@ -14,20 +15,86 @@ from ui import (
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 940
-GRID_SIZE = 4
+GRID_SIZE = 6
 
 pygame.init()
 pygame.font.init()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("4x4 Sudoku")
+pygame.display.set_caption("6x6 Sudoku")
 
-font_big = pygame.font.SysFont("comicsans", 180)
+font_big = pygame.font.SysFont("comicsans", 120)
 font_medium = pygame.font.SysFont("Arial", 40, bold=True)
 font_small = pygame.font.SysFont("Arial", 18)
 
 new_game_button = Button("New Game", 420, 845, 180, 60)
 restart_button = Button("Restart", 610, 845, 180, 60)
+
+cell_size = SCREEN_WIDTH // GRID_SIZE
+
+def load_new_game(size=6, num_clues=16):
+    # sudoku generating from Docker jotools/sudoku
+    url = "http://localhost:8080/api/sudoku/generate"
+
+    params = {
+        "size": size,
+        "numClues": num_clues,
+        "format": "json",
+        "addSolution": "true"
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    puzzle_cells = data['sudoku']
+    solution_cells = data['solution']
+
+    size = 6
+
+    puzzle_grid = [[0] * size for i in range(size)]
+    solution_grid = [[0] * size for i in range(size)]
+    locked_grid = [[False] * size for i in range(size)]
+
+    for cell in puzzle_cells:
+        row = cell['row'] - 1
+        col = cell['col'] - 1
+        puzzle_grid[row][col] = cell['value']
+        locked_grid[row][col] = cell['locked']
+
+    for cell in solution_cells:
+        row = cell['row'] - 1
+        col = cell['col'] - 1
+        solution_grid[row][col] = cell['value'] 
+    
+    # print('Puzzle: ')
+    # for row in puzzle_grid:
+    #     print(row)
+
+    # print('\nSolution: ')
+    # for row in solution_grid:
+    #     print(row)
+    
+    return puzzle_grid, solution_grid, locked_grid
+
+quiz, solution, locked = load_new_game()
+original_grid = [row[:] for row in quiz]
+
+
+state = GameState(
+    grid=quiz,
+    original_grid=original_grid,
+    cell_size=cell_size,
+    font_big=font_big,
+    font_medium=font_medium,
+    font_small=font_small
+)
+
+state.solution = solution
+
+is_solved = False
+show_warning = False
+show_fill_warning = False
+running = True
 
 
 def is_valid(state, row, col, val):
@@ -52,7 +119,7 @@ def solve(board):
 
     row, col = empty
 
-    for num in range(1, 5):
+    for num in range(1, 7):
         if is_valid(board, row, col, num):
             board[row][col] = num
 
@@ -64,9 +131,7 @@ def solve(board):
     return False
 
 
-def load_new_game():
-    quiz, solution = load_random_puzzle()
-    return quiz, solution
+   
 
 def validate_against_solution(state):
     state.wrong_cells.clear()
@@ -82,27 +147,6 @@ def validate_against_solution(state):
                 state.wrong_cells.add((row, col))
 
 
-# Initial load
-quiz, solution = load_new_game()
-original_grid = [row[:] for row in quiz]
-
-cell_size = SCREEN_WIDTH // GRID_SIZE
-
-state = GameState(
-    grid=quiz,
-    original_grid=original_grid,
-    cell_size=cell_size,
-    font_big=font_big,
-    font_medium=font_medium,
-    font_small=font_small
-)
-
-state.solution = solution
-
-is_solved = False
-show_warning = False
-show_fill_warning = False
-running = True
 
 while running:
     draw_background(screen)
@@ -113,7 +157,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if new_game_button.is_clicked(event):
-                quiz, solution = load_new_game()
+                quiz, solution, locked = load_new_game()
                 state.grid = [row[:] for row in quiz]
                 state.original_grid = [row[:] for row in quiz]
                 state.solution = solution
@@ -150,8 +194,8 @@ while running:
                 state.selected_row = min(3, state.selected_row + 1)
 
             if event.key in (
-                pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
-                pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4
+                pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,pygame.K_5, pygame.K_6,
+                pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4, pygame.K_KP5, pygame.K_KP6
             ):
                 value = int(event.unicode)
                 row = state.selected_row

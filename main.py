@@ -27,12 +27,25 @@ font_big = pygame.font.SysFont("comicsans", 120)
 font_medium = pygame.font.SysFont("Arial", 40, bold=True)
 font_small = pygame.font.SysFont("Arial", 18)
 
-new_game_button = Button("New Game", 420, 845, 180, 60)
-restart_button = Button("Restart", 610, 845, 180, 60)
+new_game_button = Button("New Game", 420, 875, 180, 60)
+restart_button = Button("Restart", 610, 875, 180, 60)
+
+easy_button = Button("Easy", 430, 805, 120, 60)
+medium_button = Button("Medium", 550, 805, 120, 60)
+hard_button = Button("Hard", 670, 805, 120, 60)
+
+
+DIFFICULTY_CLUES = {
+    "easy": 20,
+    "medium": 16,
+    "hard": 12
+}
+
+selected_difficulty = "easy"
 
 cell_size = SCREEN_WIDTH // GRID_SIZE
 
-def load_new_game(size=6, num_clues=16):
+def load_new_game(size=6, num_clues=selected_difficulty):
     # sudoku generating from Docker jotools/sudoku
     url = "http://localhost:8080/api/sudoku/generate"
 
@@ -76,7 +89,13 @@ def load_new_game(size=6, num_clues=16):
     
     return puzzle_grid, solution_grid, locked_grid
 
-quiz, solution, locked = load_new_game()
+def draw_difficulty_buttons(screen, mouse_pos, selected):
+    """Draw Easy/Medium/Hard buttons, highlighting the selected one."""
+    for btn, key in [(easy_button, "easy"), (medium_button, "medium"), (hard_button, "hard")]:
+        is_selected = (selected == key)
+        btn.draw(screen, mouse_pos, highlighted=is_selected)
+
+quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[default_difficulty])
 original_grid = [row[:] for row in quiz]
 
 
@@ -256,6 +275,7 @@ while running:
         draw_instructions(screen, font_small, SCREEN_HEIGHT)
 
     mouse_pos = pygame.mouse.get_pos()
+    draw_difficulty_buttons(screen, mouse_pos, default_difficulty)
     new_game_button.draw(screen, mouse_pos)
     restart_button.draw(screen, mouse_pos)
 

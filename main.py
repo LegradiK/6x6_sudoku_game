@@ -95,7 +95,7 @@ def draw_difficulty_buttons(screen, mouse_pos, selected):
         is_selected = (selected == key)
         btn.draw(screen, mouse_pos, highlighted=is_selected)
 
-quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[default_difficulty])
+quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[selected_difficulty])
 original_grid = [row[:] for row in quiz]
 
 
@@ -168,6 +168,7 @@ def validate_against_solution(state):
 
 
 while running:
+    
     draw_background(screen)
 
     for event in pygame.event.get():
@@ -176,7 +177,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if new_game_button.is_clicked(event):
-                quiz, solution, locked = load_new_game()
+                quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[selected_difficulty])
                 state.grid = [row[:] for row in quiz]
                 state.original_grid = [row[:] for row in quiz]
                 state.solution = solution
@@ -191,6 +192,13 @@ while running:
                 is_solved = False
                 show_warning = False
                 show_fill_warning = False
+
+            elif easy_button.is_clicked(event):
+                selected_difficulty = "easy"
+            elif medium_button.is_clicked(event):
+                selected_difficulty = "medium"
+            elif hard_button.is_clicked(event):
+                selected_difficulty = "hard"
 
             else:
                 x, y = event.pos
@@ -275,7 +283,7 @@ while running:
         draw_instructions(screen, font_small, SCREEN_HEIGHT)
 
     mouse_pos = pygame.mouse.get_pos()
-    draw_difficulty_buttons(screen, mouse_pos, default_difficulty)
+    draw_difficulty_buttons(screen, mouse_pos, selected_difficulty)
     new_game_button.draw(screen, mouse_pos)
     restart_button.draw(screen, mouse_pos)
 

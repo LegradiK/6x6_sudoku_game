@@ -36,7 +36,7 @@ pip install pygame requests
 The game fetches puzzles from a local Docker service. Start it before launching the game:
 
 ```bash
-docker run -p 8080:8080 jotools/sudoku
+docker run -p 8080:80 jotools/sudoku
 ```
 
 The API is expected at `http://localhost:8080/api/sudoku/generate`.
